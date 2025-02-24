@@ -1,4 +1,10 @@
-import { mdiDelete, mdiDotsVertical, mdiPencilOutline } from "@mdi/js";
+import {
+  mdiArrowLeft,
+  mdiDelete,
+  mdiDotsVertical,
+  mdiPencilOutline,
+  mdiPlus,
+} from "@mdi/js";
 import { Icon } from "@mdi/react";
 import {
   Alert,
@@ -6,11 +12,11 @@ import {
   Card,
   Checkbox,
   Container,
+  Grid,
   IconButton,
   MenuItem,
   Paper,
   Popover,
-  Stack,
   Table,
   TableBody,
   TableCell,
@@ -23,17 +29,18 @@ import { filter } from "lodash";
 import { useConfirm } from "material-ui-confirm";
 import { useEffect, useState } from "react";
 import { Helmet } from "react-helmet-async";
-import Iconify from "../../../core/iconify";
+import { useHistory, useLocation } from "react-router-dom";
+import { UseAuthContext } from "src/modules/auth/context/AuthProvider";
 import setMessage from "../../../core/messages/messages";
 import Scrollbar from "../../../core/scrollbar";
-import { deleteCareer, getCarreras } from "../store/store";
+import { deleteClient, getClientById, getClients } from "../store/store";
 import ClientsForm from "./ClientsForm";
 import ClientsListHead from "./ClientsListHead";
 import ClientsListToolbar from "./ClientsListToolbar";
 
 const TABLE_HEAD = [
-  { id: "cod_carrera", label: "Código", alignRight: false },
-  { id: "nomb_carrera", label: "Nombre carrera", alignRight: false },
+  { id: "identificacion", label: "Identificación", alignRight: false },
+  { id: "nomb_completo", label: "Nombre completo", alignRight: false },
   { id: "" },
 ];
 
@@ -63,8 +70,8 @@ function applySortFilter(array, comparator, query) {
   if (query) {
     return filter(
       array,
-      (_career) =>
-        String(_career.nomb_carrera)
+      (_client) =>
+        String(_client.nombre)
           .toLowerCase()
           .indexOf(String(query).toLowerCase()) !== -1
     );
@@ -77,7 +84,7 @@ export default function ClientsPage() {
   const [page, setPage] = useState(0);
   const [order, setOrder] = useState("asc");
   const [selected, setSelected] = useState([]);
-  const [orderBy, setOrderBy] = useState("nomb_carrera");
+  const [orderBy, setOrderBy] = useState("nombre");
   const [filterValue, setFilterValue] = useState("");
   const [rowsPerPage, setRowsPerPage] = useState(10);
   const [isFormVisible, setIsFormVisible] = useState(false);
@@ -85,25 +92,30 @@ export default function ClientsPage() {
   const [formData, setFormData] = useState({});
   const [refresh, setRefresh] = useState(0);
 
-  const [CARRERASLIST, setCARRERASLIST] = useState([]);
+  const [CLIENTSLIST, setCLIENTSLIST] = useState([]);
 
   const confirm = useConfirm();
 
-  const [filteredCareers, setFilteredCareers] = useState([]);
+  const [filteredClients, setFilteredClients] = useState([]);
   const [isNotFound, setIsNotFound] = useState(false);
   const [rowsNumber, setRowsNumber] = useState(0);
+  const { auth } = UseAuthContext();
+  const location = useLocation();
+  const history = useHistory();
 
   useEffect(() => {
-    getCarreras()
-      .then((response) => {
-        if (response.status === 200) {
-          setCARRERASLIST(response.data);
-        }
-      })
-      .catch((error) => {
-        console.log("Error al cargar las carreras", error);
-      });
-  }, [refresh]);
+    if (auth.userid) {
+      getClients(auth.userid)
+        .then((response) => {
+          if (response.status === 200) {
+            setCLIENTSLIST(response.data);
+          }
+        })
+        .catch((error) => {
+          console.log("Error al cargar los clientes", error);
+        });
+    }
+  }, [auth.userid, refresh]);
 
   const handleOpenInRowMenu = (event) => {
     setOpenInRowMenu(event.currentTarget);
@@ -121,7 +133,7 @@ export default function ClientsPage() {
 
   const handleSelectAllClick = (event) => {
     if (event.target.checked) {
-      const newSelecteds = CARRERASLIST.map((n) => n.cod_carrera);
+      const newSelecteds = CLIENTSLIST.map((n) => n.id);
       setSelected(newSelecteds);
       return;
     }
@@ -166,45 +178,54 @@ export default function ClientsPage() {
 
   const handleEditClick = () => {
     if (selected.length === 1) {
-      const selectedItem = filteredCareers.find(
-        (career) => career.cod_carrera === selected[0]
+      const selectedItem = filteredClients.find(
+        (client) => client.id === selected[0]
       );
       if (selectedItem) {
-        handleCloseInRowMenu();
-        setIsFormVisible(true);
-        setEditMode(true);
-        setFormData(selectedItem);
+        getClientById(selectedItem.id).then((response) => {
+          if (response.status === 200) {
+            handleCloseInRowMenu();
+            setIsFormVisible(true);
+            setEditMode(true);
+            setFormData(response.data);
+          } else {
+            handleCloseInRowMenu();
+            setMessage("error", "¡Ha ocurrido un error!");
+          }
+        });
       }
     }
   };
 
   const handleDeleteClick = () => {
     if (selected.length === 1) {
-      const selectedItem = filteredCareers.find(
-        (career) => career.cod_carrera === selected[0]
+      const selectedItem = filteredClients.find(
+        (client) => client.id === selected[0]
       );
       if (selectedItem) {
         confirm({
           content: (
             <Alert
               severity={"warning"}
-            >{`¿Desea eliminar la carrera: ${selectedItem.nomb_carrera} ?`}</Alert>
+            >{`¿Desea eliminar el cliente: ${selectedItem.nombre} ${selectedItem.apellidos} ?`}</Alert>
           ),
         })
           .then(() => {
-            deleteCareer(selectedItem)
+            setMessage("warning", "¡Acción no disponible por el momento!");
+
+            /* deleteClient(selectedItem)
               .then((response) => {
                 if (response.status === 200) {
-                  setMessage("success", "¡Carrera eliminada con éxito!");
+                  setMessage("success", "Cliente eliminado con éxito!");
                   setOpenInRowMenu(false);
                   setSelected([]);
                   setRefresh(refresh + 1);
                 }
               })
               .catch((error) => {
-                console.log("Error al eliminar la carrera", error);
+                console.log("Error al eliminar el cliente", error);
                 setMessage("error", "¡Ha ocurrido un error!");
-              });
+              }); */
           })
           .catch(() => {});
       }
@@ -213,21 +234,21 @@ export default function ClientsPage() {
 
   const handleMultipleDeleteClick = () => {
     if (selected.length > 0) {
-      const selectedItems = filteredCareers.filter((career) =>
-        selected.includes(career.cod_carrera)
+      const selectedItems = filteredClients.filter((client) =>
+        selected.includes(client.id)
       );
 
       confirm({
         content: (
           <Alert
             severity={"warning"}
-          >{`¿Desea eliminar las ${selected.length} carreras seleccionadas?`}</Alert>
+          >{`¿Desea eliminar los ${selected.length} clientes seleccionados?`}</Alert>
         ),
       })
         .then(() => {
           // Perform the deletion of multiple records
           Promise.all(
-            selectedItems.map((selectedItem) => deleteCareer(selectedItem))
+            selectedItems.map((selectedItem) => deleteClient(selectedItem))
           )
             .then((responses) => {
               const isSuccess = responses.every(
@@ -237,17 +258,17 @@ export default function ClientsPage() {
               if (isSuccess) {
                 setMessage(
                   "success",
-                  `¡${selected.length} carreras eliminadas con éxito!`
+                  `¡${selected.length} clientes eliminados con éxito!`
                 );
                 setOpenInRowMenu(false);
                 setSelected([]);
                 setRefresh(refresh + 1);
               } else {
-                setMessage("warning", "¡Alguna carrera no pudo ser eliminada!");
+                setMessage("warning", "¡Algún cliente no pudo ser eliminado!");
               }
             })
             .catch((error) => {
-              console.log("Error al eliminar las carreras", error);
+              console.log("Error al eliminar los clientes", error);
               setMessage("error", "¡Ha ocurrido un error!");
             });
         })
@@ -261,17 +282,17 @@ export default function ClientsPage() {
   };
 
   useEffect(() => {
-    setRowsNumber(CARRERASLIST.length);
-    setFilteredCareers(
-      applySortFilter(CARRERASLIST, getComparator(order, orderBy), filterValue)
+    setRowsNumber(CLIENTSLIST.length);
+    setFilteredClients(
+      applySortFilter(CLIENTSLIST, getComparator(order, orderBy), filterValue)
     );
-    setIsNotFound(!filteredCareers.length && !!filterValue);
-  }, [CARRERASLIST, filterValue, order, orderBy]);
+    setIsNotFound(!filteredClients.length && !!filterValue);
+  }, [CLIENTSLIST, filterValue, order, orderBy]);
 
   return (
     <>
       <Helmet>
-        <title> Clients | SAPCE </title>
+        <title> Clients | REY-TECHTEST </title>
       </Helmet>
 
       {isFormVisible ? (
@@ -287,30 +308,47 @@ export default function ClientsPage() {
         />
       ) : (
         <Container>
-          <Stack
-            direction="row"
+          <Grid
+            container
             alignItems="center"
             justifyContent="space-between"
             mb={5}
           >
-            <Typography variant="h4" gutterBottom>
-              Clientes
-            </Typography>
-            <Button
-              variant="contained"
-              style={{ textTransform: "none" }}
-              startIcon={<Iconify icon="eva:plus-fill" />}
-              onClick={() => {
-                setIsFormVisible(true);
-                setEditMode(false);
-                setFormData({});
-              }}
-            >
-              Registrar Carrera
-            </Button>
-          </Stack>
+            <Grid item>
+              <Typography variant="h4" gutterBottom>
+                Consulta de clientes
+              </Typography>
+            </Grid>
+            <Grid item>
+              <Button
+                variant="contained"
+                style={{ textTransform: "none", marginRight: "10px" }}
+                startIcon={<Icon size={1} path={mdiPlus} />}
+                onClick={() => {
+                  setEditMode(false);
+                  setIsFormVisible(true);
+                  setFormData({});
+                }}
+              >
+                Agregar
+              </Button>
+              <Button
+                variant="contained"
+                style={{ textTransform: "none" }}
+                startIcon={<Icon size={1} path={mdiArrowLeft} />}
+                onClick={() => {
+                  history.push("/dashboard", {
+                    state: { from: location },
+                    replace: true,
+                  });
+                }}
+              >
+                Regresar
+              </Button>
+            </Grid>
+          </Grid>
 
-          <Card>
+          <Card sx={{ maxHeight: "500px" }}>
             <ClientsListToolbar
               numSelected={selected.length}
               filterValue={filterValue}
@@ -319,49 +357,50 @@ export default function ClientsPage() {
             />
 
             <Scrollbar>
-              <TableContainer>
+              <TableContainer style={{ overflow: "auto" }}>
                 <Table size="small">
                   <ClientsListHead
                     order={order}
                     orderBy={orderBy}
                     headLabel={TABLE_HEAD}
-                    rowCount={CARRERASLIST.length}
+                    rowCount={CLIENTSLIST.length}
                     numSelected={selected.length}
                     onRequestSort={handleRequestSort}
                     onSelectAllClick={handleSelectAllClick}
                   />
                   <TableBody>
-                    {filteredCareers
+                    {filteredClients
                       .slice(
                         page * rowsPerPage,
                         page * rowsPerPage + rowsPerPage
                       )
                       .map((row) => {
-                        const { cod_carrera, nomb_carrera, eliminada } = row;
-                        const selectedCareer =
-                          selected.indexOf(cod_carrera) !== -1;
+                        const { id, identificacion, nombre, apellidos } = row;
+                        const selectedClient = selected.indexOf(id) !== -1;
 
                         return (
                           <TableRow
-                            onClick={() => handleRowClick(cod_carrera)}
+                            onClick={() => handleRowClick(id)}
                             hover
-                            key={cod_carrera}
+                            key={id}
                             tabIndex={-1}
                             role="checkbox"
-                            selected={selectedCareer}
+                            selected={selectedClient}
                           >
                             <TableCell padding="checkbox">
                               <Checkbox
-                                checked={selectedCareer}
+                                checked={selectedClient}
                                 onChange={(event) =>
-                                  handleSelectClick(event, cod_carrera)
+                                  handleSelectClick(event, id)
                                 }
                               />
                             </TableCell>
 
-                            <TableCell align="left">{cod_carrera}</TableCell>
+                            <TableCell align="left">{identificacion}</TableCell>
 
-                            <TableCell align="left">{nomb_carrera}</TableCell>
+                            <TableCell align="left">
+                              {String(nombre) + " " + String(apellidos)}
+                            </TableCell>
 
                             <TableCell align="right">
                               <IconButton
@@ -378,7 +417,7 @@ export default function ClientsPage() {
                     {rowsNumber === 0 && (
                       <TableRow style={{ height: 53 * rowsNumber }}>
                         <TableCell colSpan={6} sx={{ textAlign: "center" }}>
-                          Nada que mostrar
+                          Sin datos
                         </TableCell>
                       </TableRow>
                     )}
@@ -414,7 +453,7 @@ export default function ClientsPage() {
           <TablePagination
             rowsPerPageOptions={[5, 10, 25]}
             component="div"
-            count={CARRERASLIST.length}
+            count={CLIENTSLIST.length}
             rowsPerPage={rowsPerPage}
             page={page}
             labelRowsPerPage={"Filas por página"}

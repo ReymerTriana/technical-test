@@ -9,7 +9,7 @@ export default function HomePage() {
   return (
     <>
       <Helmet>
-        <title> Dashboard | SAPCE </title>
+        <title> Dashboard | REY-TECHTEST </title>
       </Helmet>
 
       <Container

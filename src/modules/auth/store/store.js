@@ -2,7 +2,7 @@ import { axiosForAuth } from "../../../core/api/api";
 
 export const login = async (loginData) => {
   try {
-    const response = await axiosForAuth.post(`auth/login`, loginData);
+    const response = await axiosForAuth.post(`Authenticate/login`, loginData);
     return response;
   } catch (error) {
     if (!error?.response) {
@@ -16,7 +16,7 @@ export const login = async (loginData) => {
 
 export const signup = async (loginData) => {
   try {
-    const response = await axiosForAuth.post(`auth/login`, loginData);
+    const response = await axiosForAuth.post(`Authenticate/login`, loginData);
     return response;
   } catch (error) {
     if (!error?.response) {

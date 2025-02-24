@@ -13,7 +13,7 @@ const visuallyHidden = {
   clip: 'rect(0 0 0 0)',
 };
 
-CareersListHead.propTypes = {
+ClientsListHead.propTypes = {
   order: PropTypes.oneOf(['asc', 'desc']),
   orderBy: PropTypes.string,
   rowCount: PropTypes.number,
@@ -22,7 +22,7 @@ CareersListHead.propTypes = {
   onRequestSort: PropTypes.func,
   onSelectAllClick: PropTypes.func,
 };
-export default function CareersListHead({
+export default function ClientsListHead({
   order,
   orderBy,
   rowCount,

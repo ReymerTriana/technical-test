@@ -31,7 +31,7 @@ export default function SignUpPage() {
   return (
     <>
       <Helmet>
-        <title> SignUp | SAPCE </title>
+        <title> SignUp | REY-TECHTEST </title>
       </Helmet>
 
       <StyledRoot>

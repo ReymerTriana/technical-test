@@ -34,7 +34,7 @@ export default function LoginPage() {
   return (
     <>
       <Helmet>
-        <title> Login | SAPCE </title>
+        <title> Login | REY-TECHTEST </title>
       </Helmet>
 
       <StyledRoot>

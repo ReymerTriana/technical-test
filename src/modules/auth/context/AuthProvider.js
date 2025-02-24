@@ -12,8 +12,8 @@ export const AuthProvider = ({ children }) => {
   useEffect(() => {
     setAuth({
       username: localStorage.getItem("username"),
-      rol: localStorage.getItem("rol"),
-      name: localStorage.getItem("name"),
+      userid: localStorage.getItem("userid"),
+      expiration: localStorage.getItem("expiration"),
       token: localStorage.getItem("accessToken"),
     });
   }, []);

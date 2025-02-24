@@ -33,10 +33,10 @@ function LoginForm({ history }) {
   const destino = "/dashboard";
   const [showPassword, setShowPassword] = useState(false);
 
-  const setUserData = (username, rol, name, token) => {
+  const setUserData = (username, userid, expiration, token) => {
     localStorage.setItem("username", username);
-    localStorage.setItem("rol", rol);
-    localStorage.setItem("name", name);
+    localStorage.setItem("userid", userid);
+    localStorage.setItem("expiration", expiration);
     localStorage.setItem("accessToken", token);
   };
 
@@ -52,15 +52,18 @@ function LoginForm({ history }) {
           setAuth({ ...userAuth });
           setUserData(
             response.data.username,
-            response.data.rol,
-            response.data.name,
+            response.data.userid,
+            response.data.expiration,
             response.data.token
           );
 
-          setMessage("success", `¡Bienvenido ${userAuth.name}!`);
+          setMessage("success", `¡Bienvenido ${userAuth.username}!`);
 
           history.replace(destino);
-        } else if (response.request.status === 401) {
+        } else if (
+          response.request.status === 401 ||
+          response.request.status === 400
+        ) {
           const newErrors = {};
 
           newErrors.username = "error";
@@ -83,7 +86,17 @@ function LoginForm({ history }) {
           name="username"
           label="Usuario"
           value={username}
-          onChange={(event) => setUsername(event.target.value)}
+          onChange={(event) => {
+            if (event.target.value !== "") {
+              setUsername(event.target.value);
+              let errorsUpdate = errors;
+              delete errorsUpdate["username"];
+              setErrors(errorsUpdate);
+            } else {
+              setUsername(event.target.value);
+              setErrors((prevState) => ({ ...prevState, username: "error" }));
+            }
+          }}
           error={!!errors.username}
           required
           inputProps={{ maxLength: 15 }}
@@ -99,7 +112,17 @@ function LoginForm({ history }) {
           label="Contraseña"
           type={showPassword ? "text" : "password"}
           value={password}
-          onChange={(event) => setPassword(event.target.value)}
+          onChange={(event) => {
+            if (event.target.value !== "") {
+              setPassword(event.target.value);
+              let errorsUpdate = errors;
+              delete errorsUpdate["password"];
+              setErrors(errorsUpdate);
+            } else {
+              setPassword(event.target.value);
+              setErrors((prevState) => ({ ...prevState, password: "error" }));
+            }
+          }}
           InputProps={{
             endAdornment: (
               <InputAdornment position="end">
