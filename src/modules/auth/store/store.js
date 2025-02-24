@@ -14,9 +14,12 @@ export const login = async (loginData) => {
   }
 };
 
-export const signup = async (loginData) => {
+export const signup = async (registerData) => {
   try {
-    const response = await axiosForAuth.post(`Authenticate/login`, loginData);
+    const response = await axiosForAuth.post(
+      `Authenticate/register`,
+      registerData
+    );
     return response;
   } catch (error) {
     if (!error?.response) {
