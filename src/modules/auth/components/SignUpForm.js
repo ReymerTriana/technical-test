@@ -6,67 +6,83 @@ import { IconButton, InputAdornment, Stack, TextField } from "@mui/material";
 // components
 import Iconify from "../../../core/iconify";
 import setMessage from "../../../core/messages/messages";
-import { UseAuthContext } from "../context/AuthProvider";
-import { login } from "../store/store";
+import { signup } from "../store/store";
 
 // ----------------------------------------------------------------------
 
 function SignUpForm({ history }) {
-  const { setAuth } = UseAuthContext();
-
   const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
   const [errors, setErrors] = useState({
     username: "",
+    email: "",
     password: "",
   });
 
-  const destino = "/dashboard";
   const [showPassword, setShowPassword] = useState(false);
 
-  const setUserData = (username, rol, name, token) => {
-    localStorage.setItem("username", username);
-    localStorage.setItem("rol", rol);
-    localStorage.setItem("name", name);
-    localStorage.setItem("accessToken", token);
+  const validateEmail = (value) => {
+    const valid = new RegExp(/^[^\s@]+@[^\s@]+\.[^\s@]+$/);
+    return valid.test(value.toString());
+  };
+
+  const validatePassword = (value) => {
+    const valid = new RegExp(
+      /^(?=.*[0-9])(?=.*[!@#$%^&*])[a-zA-Z0-9!@#$%^&*]{9,20}$/
+    );
+    return valid.test(value.toString());
+  };
+
+  const validateData = () => {
+    const newErrors = {};
+
+    if (!username) {
+      newErrors.username = "Nombre de Usuario requerido";
+    }
+    if (!email) {
+      newErrors.email = "Email requerido";
+    }
+    if (!password) {
+      newErrors.password = "Contraseña requerida";
+    }
+
+    if (Object.keys(newErrors).length === 0) {
+      if (!validatePassword(password)) {
+        newErrors.password =
+          "Debe ser mayor a 8 y menor o igual a 20 caracteres, tener al menos un número, al menos una mayúscula y una minúscula.";
+      }
+      if (!validateEmail(email)) {
+        newErrors.email = "Introduzca una dirección de correo válida.";
+      }
+    }
+
+    setErrors(newErrors);
+
+    return Object.keys(newErrors).length === 0;
   };
 
   const handleLogin = () => {
     localStorage.removeItem("accessToken");
-    const loginData = { username, password };
+    if (validateData()) {
+      const loginData = { username, email, password };
 
-    login(loginData)
-      .then((response) => {
-        if (response.status === 200) {
-          const userAuth = response.data;
+      signup(loginData)
+        .then((response) => {
+          if (response.status === 200) {
+            setMessage("success", response.data.message);
 
-          setAuth({ ...userAuth });
-          setUserData(
-            response.data.username,
-            response.data.rol,
-            response.data.name,
-            response.data.token
-          );
-
-          setMessage("success", `¡Bienvenido ${userAuth.name}!`);
-
-          history.replace(destino);
-        } else if (response.request.status === 401) {
-          const newErrors = {};
-
-          newErrors.username = "error";
-          newErrors.password = "error";
-          setErrors(newErrors);
-
-          setMessage("error", `¡Credenciales Incorrectas!`);
-        }
-      })
-      .catch((error) => {
-        console.log("Error al realizar el login", error);
-        setMessage("error", `¡Ha ocurrido un error!`);
-      });
+            history.replace("/login");
+          } else {
+            setMessage("error", `¡Ha ocurrido un error!`);
+          }
+        })
+        .catch((error) => {
+          console.log("Error al realizar el registro", error);
+          setMessage("error", `¡Ha ocurrido un error!`);
+        });
+    }
   };
 
   return (
@@ -76,8 +92,14 @@ function SignUpForm({ history }) {
           name="username"
           label="Nombre Usuario"
           value={username}
-          onChange={(event) => setUsername(event.target.value)}
+          onChange={(event) => {
+            setUsername(event.target.value);
+            let errorsUpdate = errors;
+            delete errorsUpdate["username"];
+            setErrors(errorsUpdate);
+          }}
           error={!!errors.username}
+          helperText={errors.username}
           required
           inputProps={{ maxLength: 15 }}
           onKeyDown={(e) => {
@@ -85,27 +107,40 @@ function SignUpForm({ history }) {
               handleLogin();
             }
           }}
+          autoComplete="off"
         />
         <TextField
           name="email"
           label="Dirección de correo"
           value={email}
-          onChange={(event) => setEmail(event.target.value)}
+          onChange={(event) => {
+            setEmail(event.target.value);
+            let errorsUpdate = errors;
+            delete errorsUpdate["email"];
+            setErrors(errorsUpdate);
+          }}
           error={!!errors.email}
+          helperText={errors.email}
           required
-          inputProps={{ maxLength: 15 }}
+          inputProps={{ maxLength: 50 }}
           onKeyDown={(e) => {
             if (e.key === "Enter") {
               handleLogin();
             }
           }}
+          autoComplete="off"
         />
         <TextField
           name="password"
           label="Contraseña"
           type={showPassword ? "text" : "password"}
           value={password}
-          onChange={(event) => setPassword(event.target.value)}
+          onChange={(event) => {
+            setPassword(event.target.value);
+            let errorsUpdate = errors;
+            delete errorsUpdate["password"];
+            setErrors(errorsUpdate);
+          }}
           InputProps={{
             endAdornment: (
               <InputAdornment position="end">
@@ -122,12 +157,14 @@ function SignUpForm({ history }) {
           }}
           inputProps={{ maxLength: 20 }}
           error={!!errors.password}
+          helperText={errors.password}
           required
           onKeyDown={(e) => {
             if (e.key === "Enter") {
               handleLogin();
             }
           }}
+          autoComplete="off"
         />
       </Stack>
 

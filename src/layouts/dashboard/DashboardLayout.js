@@ -8,6 +8,7 @@ import ClientsPage from "src/modules/clients/components/ClientsPage";
 import HomePage from "src/modules/home/app/components/HomePage";
 import Header from "./header/Header";
 import Nav from "./nav/Nav";
+import { isEmpty } from "lodash";
 
 // ----------------------------------------------------------------------
 
@@ -38,8 +39,16 @@ const Main = styled("div")(({ theme }) => ({
 export default function DashboardLayout() {
   const [open, setOpen] = useState(false);
   const { auth } = UseAuthContext();
-  const [goDashboard] = useState(localStorage.getItem("username"));
+  const [goDashboard] = useState(
+    !isEmpty(localStorage.getItem("username"))
+      ? true
+      : !isEmpty(auth.username)
+      ? true
+      : false
+  );
   const history = useHistory();
+
+  useEffect(() => {}, []);
 
   useEffect(() => {
     console.log("EL USERNAME EN EL DASH", auth.username);

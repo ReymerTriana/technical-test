@@ -5,11 +5,13 @@ const AuthContext = createContext({});
 export const AuthProvider = ({ children }) => {
   const [auth, setAuth] = useState({});
 
-  useEffect(() => {
+  /*   useEffect(() => {
     console.log("Cambio en el auth:", auth);
-  }, [auth]);
+  }, [auth]); */
 
   useEffect(() => {
+    console.log("desde el localhost", localStorage.getItem("username"));
+
     setAuth({
       username: localStorage.getItem("username"),
       userid: localStorage.getItem("userid"),

@@ -24,6 +24,7 @@ function LoginForm({ history }) {
 
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
+  const [rememberMeValue, setRememberMeValue] = useState(true);
 
   const [errors, setErrors] = useState({
     username: "",
@@ -33,50 +34,75 @@ function LoginForm({ history }) {
   const destino = "/dashboard";
   const [showPassword, setShowPassword] = useState(false);
 
-  const setUserData = (username, userid, expiration, token) => {
+  const setUserData = (username, userid, expiration, token, stayLoggedIn) => {
     localStorage.setItem("username", username);
     localStorage.setItem("userid", userid);
     localStorage.setItem("expiration", expiration);
     localStorage.setItem("accessToken", token);
+    localStorage.setItem("stayLoggedIn", stayLoggedIn);
+  };
+
+  const validateData = () => {
+    const newErrors = {};
+
+    if (!username) {
+      newErrors.username = "Nombre de Usuario requerido";
+    }
+    if (!password) {
+      newErrors.password = "Contraseña requerida";
+    }
+
+    setErrors(newErrors);
+
+    return Object.keys(newErrors).length === 0;
   };
 
   const handleLogin = () => {
     localStorage.removeItem("accessToken");
-    const loginData = { username, password };
 
-    login(loginData)
-      .then((response) => {
-        if (response.status === 200) {
-          const userAuth = response.data;
+    if (validateData()) {
+      const loginData = { username, password };
 
-          setAuth({ ...userAuth });
-          setUserData(
-            response.data.username,
-            response.data.userid,
-            response.data.expiration,
-            response.data.token
-          );
+      login(loginData)
+        .then((response) => {
+          if (response.status === 200) {
+            const userAuth = response.data;
 
-          setMessage("success", `¡Bienvenido ${userAuth.username}!`);
+            setAuth({ ...userAuth });
 
-          history.replace(destino);
-        } else if (
-          response.request.status === 401 ||
-          response.request.status === 400
-        ) {
-          const newErrors = {};
+            if (rememberMeValue) {
+              setUserData(
+                response.data.username,
+                response.data.userid,
+                response.data.expiration,
+                response.data.token,
+                rememberMeValue
+              );
+            } else {
+              localStorage.setItem("accessToken", response.data.token);
+            }
 
-          newErrors.username = "error";
-          newErrors.password = "error";
-          setErrors(newErrors);
+            setMessage("success", `¡Bienvenido ${userAuth.username}!`);
 
-          setMessage("error", `¡Credenciales Incorrectas!`);
-        }
-      })
-      .catch((error) => {
-        console.log("Error al realizar el login", error);
-        setMessage("error", `¡Ha ocurrido un error!`);
-      });
+            history.replace(destino);
+          } else if (
+            response.request.status === 401 ||
+            response.request.status === 400
+          ) {
+            const newErrors = {};
+
+            newErrors.username = "Nombre de Usuario incorrecto";
+            newErrors.password = "Contraseña incorrecta";
+            setErrors(newErrors);
+
+            setMessage("error", `¡Credenciales Incorrectas!`);
+          }
+        })
+        .catch((error) => {
+          console.log("Error al realizar el login", error);
+          setMessage("error", `¡Ha ocurrido un error!`);
+        });
+    }
   };
 
   return (
@@ -94,10 +120,14 @@ function LoginForm({ history }) {
               setErrors(errorsUpdate);
             } else {
               setUsername(event.target.value);
-              setErrors((prevState) => ({ ...prevState, username: "error" }));
+              setErrors((prevState) => ({
+                ...prevState,
+                username: "Nombre de Usuario requerido",
+              }));
             }
           }}
           error={!!errors.username}
+          helperText={errors.username}
           required
           inputProps={{ maxLength: 15 }}
           onKeyDown={(e) => {
@@ -120,7 +150,10 @@ function LoginForm({ history }) {
               setErrors(errorsUpdate);
             } else {
               setPassword(event.target.value);
-              setErrors((prevState) => ({ ...prevState, password: "error" }));
+              setErrors((prevState) => ({
+                ...prevState,
+                password: "Contraseña requerida",
+              }));
             }
           }}
           InputProps={{
@@ -139,6 +172,7 @@ function LoginForm({ history }) {
           }}
           inputProps={{ maxLength: 20 }}
           error={!!errors.password}
+          helperText={errors.password}
           required
           onKeyDown={(e) => {
             if (e.key === "Enter") {
@@ -149,7 +183,15 @@ function LoginForm({ history }) {
       </Stack>
 
       <FormControlLabel
-        control={<Checkbox checked={false} />}
+        control={
+          <Checkbox
+            checked={rememberMeValue}
+            onChange={(newValue) => {
+              console.log("clicked recuerdame", newValue);
+              setRememberMeValue(!rememberMeValue);
+            }}
+          />
+        }
         label="Recuérdame"
       />
 
