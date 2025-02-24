@@ -14,7 +14,7 @@ export default function navConfig() {
       enabled: true,
     },
     {
-      title: "Gestión de usuarios",
+      title: "Consulta Clientes",
       path: "/dashboard/clients",
       icon: <Icon size={1} path={mdiAccountWrenchOutline} />,
       // haveAccess: auth.rol === "Administrador",

@@ -1,4 +1,4 @@
-import { mdiAccountCircleOutline, mdiLogout } from "@mdi/js";
+import { mdiAccountCircle, mdiLogout } from "@mdi/js";
 import { Icon } from "@mdi/react";
 import { useConfirm } from "material-ui-confirm";
 import PropTypes from "prop-types";
@@ -106,10 +106,10 @@ function Nav({ openNav, onCloseNav, history }) {
       <Box sx={{ mt: `${HEADER_DESKTOP}px`, mx: 2.5, cursor: "pointer" }}>
         <Link underline="none">
           <StyledAccount onClick={(event) => handleOpenSessionMenu(event)}>
-            <Icon size={3.5} path={mdiAccountCircleOutline} />
+            <Icon size={3.5} path={mdiAccountCircle} />
 
             <Typography variant="h4" sx={{ color: palette.primary.dark }}>
-              {auth.name}
+              {auth.username}
             </Typography>
           </StyledAccount>
         </Link>

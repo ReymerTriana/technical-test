@@ -1,14 +1,14 @@
 import axios from "axios";
 
 export const axiosForAuth = axios.create({
-  baseURL: "https://pruebareactjs.test-class.com/Api/", // api Url
-  timeout: 10000, // Set a timeout for requests
+  baseURL: "https://pruebareactjs.test-class.com/Api/api", // api Url
+  timeout: 20000, // Set a timeout for requests
 });
 
 export const axiosInstance = axios.create({
-  baseURL: "https://pruebareactjs.test-class.com/Api/", // api Url
+  baseURL: "https://pruebareactjs.test-class.com/Api/api", // api Url
   // baseURL: 'http://localhost:8080/cpe-backend-0.0.1-SNAPSHOT/api/v1/', // api Url
-  timeout: 10000, // Set a timeout for requests
+  timeout: 20000, // Set a timeout for requests
   headers: { "Content-Type": "application/json" },
 });
 axiosInstance.interceptors.request.use(

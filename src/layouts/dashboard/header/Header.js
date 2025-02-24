@@ -18,6 +18,7 @@ import { useConfirm } from "material-ui-confirm";
 import { useHistory, useLocation } from "react-router-dom";
 import { UseAuthContext } from "src/modules/auth/context/AuthProvider";
 import Iconify from "../../../core/iconify";
+import palette from "src/core/theme/palette";
 //
 
 // ----------------------------------------------------------------------
@@ -96,7 +97,11 @@ export default function Header({ onOpenNav }) {
           alignItems={"center"}
         >
           <Grid item>
-            <Typography variant="h4" textAlign={"left"} sx={{ color: "black" }}>
+            <Typography
+              variant="h4"
+              textAlign={"left"}
+              sx={{ color: palette.text.primary }}
+            >
               COMPAÑÍA PRUEBA
             </Typography>
           </Grid>
@@ -106,9 +111,9 @@ export default function Header({ onOpenNav }) {
               <Typography
                 variant="h4"
                 textAlign={"right"}
-                sx={{ color: "black" }}
+                sx={{ color: palette.text.primary }}
               >
-                {auth.name}
+                {auth.username}
               </Typography>
             </Grid>
             <Grid item sx={{ pt: "4px" }}>

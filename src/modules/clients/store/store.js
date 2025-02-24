@@ -1,67 +1,81 @@
-import { axiosForAuth, axiosInstance } from "../../../core/api/api";
+import { axiosInstance } from "../../../core/api/api";
 
-export const getCarreras = async () => {
+export const getInterest = async () => {
   try {
-    const response = await axiosInstance.get(`carrera/`);
+    const response = await axiosInstance.get(`Intereses/Listado/`);
     return response;
   } catch (error) {
-    console.log("Error en getCarreras", error);
+    console.log("Error en getInterest", error);
     throw error;
   }
 };
 
-export const getCarrerasRequester = async () => {
+export const getClients = async (userid) => {
   try {
-    const response = await axiosForAuth.get(`carrera/`);
+    const response = await axiosInstance.post(`Cliente/Listado/`, {
+      identificacion: "string",
+      nombre: "string",
+      usuarioId: userid,
+    });
+
     return response;
   } catch (error) {
-    console.log("Error en getCarrerasRequester", error);
+    console.log("Error en getClientes", error);
     throw error;
   }
 };
 
-export const insertCarrera = async (carrera) => {
+export const getClientById = async (clientId) => {
   try {
-    const response = await axiosInstance.post(`carrera/`, carrera);
+    const response = await axiosInstance.get(`Cliente/Obtener/${clientId}`);
+
+    return response;
+  } catch (error) {
+    console.log("Error en getClientes", error);
+    throw error;
+  }
+};
+
+export const insertCliente = async (cliente) => {
+  try {
+    const response = await axiosInstance.post(`Cliente/Crear/`, cliente);
     return response;
   } catch (error) {
     if (
       error.request.status === 500 &&
-      error.request.response === "Duplicated carrera"
+      error.request.response === "Duplicated cliente"
     ) {
-      console.log("Error en insertarCarrera", error);
+      console.log("Error en insertarCliente", error);
       return error;
     }
-    console.log("Error en insertarCarrera", error);
+    console.log("Error en insertarCliente", error);
     throw error;
   }
 };
 
-export const updateCarrera = async (carrera) => {
+export const updateCliente = async (cliente) => {
   try {
-    const response = await axiosInstance.put(`carrera/`, carrera);
+    const response = await axiosInstance.post(`Cliente/Actualizar`, cliente);
     return response;
   } catch (error) {
     if (
       error.request.status === 500 &&
-      error.request.response === "Duplicated carrera"
+      error.request.response === "Duplicated cliente"
     ) {
-      console.log("Error en modificarCarrera", error);
+      console.log("Error en modificarCliente", error);
       return error;
     }
-    console.log("Error en modificarCarrera", error);
+    console.log("Error en modificarCliente", error);
     throw error;
   }
 };
 
-export const deleteCareer = async (career) => {
+export const deleteClient = async (career) => {
   try {
-    const response = await axiosInstance.delete(
-      `carrera/${career.cod_carrera}`
-    );
+    const response = await axiosInstance.delete(`carrera/${career.id}`);
     return response;
   } catch (error) {
-    console.log("Error en deleteCareer", error);
+    console.log("Error en deleteClient", error);
     throw error;
   }
 };

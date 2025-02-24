@@ -35,13 +35,13 @@ const StyledSearch = styled(OutlinedInput)(({ theme }) => ({
 
 // ----------------------------------------------------------------------
 
-CareersListToolbar.propTypes = {
+ClientsListToolbar.propTypes = {
   numSelected: PropTypes.number,
   filterValue: PropTypes.string,
   onFilterValue: PropTypes.func,
   handleDelete: PropTypes.func,
 };
-export default function CareersListToolbar({
+export default function ClientsListToolbar({
   numSelected,
   filterValue,
   onFilterValue,
@@ -64,7 +64,7 @@ export default function CareersListToolbar({
         <StyledSearch
           value={filterValue}
           onChange={onFilterValue}
-          placeholder="Buscar carrera..."
+          placeholder="Buscar cliente..."
           startAdornment={
             <InputAdornment position="start">
               <Iconify
