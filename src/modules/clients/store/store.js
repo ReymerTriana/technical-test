@@ -70,9 +70,11 @@ export const updateCliente = async (cliente) => {
   }
 };
 
-export const deleteClient = async (career) => {
+export const deleteClient = async (client) => {
   try {
-    const response = await axiosInstance.delete(`carrera/${career.id}`);
+    const response = await axiosInstance.delete(
+      `Cliente/Eliminar/${client.id}`
+    );
     return response;
   } catch (error) {
     console.log("Error en deleteClient", error);

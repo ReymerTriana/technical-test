@@ -211,7 +211,9 @@ export default function ClientsPage() {
           ),
         })
           .then(() => {
-            deleteClient(selectedItem)
+            setMessage("warning", "¡Acción no disponible por el momento!");
+
+            /* deleteClient(selectedItem)
               .then((response) => {
                 if (response.status === 200) {
                   setMessage("success", "Cliente eliminado con éxito!");
@@ -223,7 +225,7 @@ export default function ClientsPage() {
               .catch((error) => {
                 console.log("Error al eliminar el cliente", error);
                 setMessage("error", "¡Ha ocurrido un error!");
-              });
+              }); */
           })
           .catch(() => {});
       }
